@@ -4,6 +4,12 @@ require 'audit_log_parser/version'
 class AuditLogParser
   class Error < StandardError; end
 
+  def self.parse(src)
+    src.each_line.map do |line|
+      parse_line(line)
+    end
+  end
+
   def self.parse_line(line)
     line = line.strip
 
