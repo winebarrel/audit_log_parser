@@ -67,7 +67,7 @@ class AuditLogParser
       when "'"
         nest = ss.scan_until(/'/)
         nest.chomp!("'")
-        value = nest
+        value = parse_body(nest)
       else
         value << ss.scan_until(/( |\z)/)
         value.chomp!(' ')

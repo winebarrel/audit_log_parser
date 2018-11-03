@@ -69,7 +69,13 @@ RSpec.describe AuditLogParser do
         "ses"=>"1",
         "subj"=>"unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023",
         "msg"=>
-          "op=PAM:authentication acct=\"root\" exe=\"/bin/su\" hostname=? addr=? terminal=pts/0 res=failed"}},
+          {"acct"=>"\"root\"",
+           "addr"=>"?",
+           "exe"=>"\"/bin/su\"",
+           "hostname"=>"?",
+           "op"=>"PAM:authentication",
+           "res"=>"failed",
+           "terminal"=>"pts/0"}}},
     }
   end
 
