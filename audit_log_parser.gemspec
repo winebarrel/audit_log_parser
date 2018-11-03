@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['winebarrel']
   spec.email         = ['sugawara@winebarrel.jp']
 
-  spec.summary       = %q{Parse linux's audit log.}
-  spec.description   = %q{Parse linux's audit log.}
+  spec.summary       = %q{It is a library for parsing.}
+  spec.description   = %q{It is a library for parsing.}
   spec.homepage      = 'https://github.com/winebarrel/audit_log_parser'
   spec.license       = 'MIT'
 

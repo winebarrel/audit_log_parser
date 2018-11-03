@@ -1,8 +1,9 @@
-# AuditLogParser
+# audit_log_parser
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/audit_log_parser`. To experiment with that code, run `bin/console` for an interactive prompt.
+It is a library for parsing [linux's audit log](https://github.com/linux-audit/audit-documentation/wiki).
 
-TODO: Delete this and the text above, and describe your gem
+[![Gem Version](https://badge.fury.io/rb/audit_log_parser.svg)](http://badge.fury.io/rb/audit_log_parser)
+[![Build Status](https://travis-ci.org/winebarrel/audit_log_parser.svg?branch=master)](https://travis-ci.org/winebarrel/audit_log_parser)
 
 ## Installation
 
@@ -22,18 +23,42 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+#!/usr/bin/env ruby
+require 'audit_log_parser'
+require 'pp'
 
-## Development
+audit_log = <<EOS
+type=SYSCALL msg=audit(1364481363.243:24287): arch=c000003e syscall=2 success=no exit=-13 a0=7fffd19c5592 a1=0 a2=7fffd19c4b50 a3=a items=1 ppid=2686 pid=3538 auid=500 uid=500 gid=500 euid=500 suid=500 fsuid=500 egid=500 sgid=500 fsgid=500 tty=pts0 ses=1 comm="cat" exe="/bin/cat" subj=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 key="sshd_config"
+EOS
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/audit_log_parser.
-
-## License
-
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+pp AuditLogParser.parse(data)
+#=> {"header"=>{"type"=>"SYSCALL", "msg"=>"audit(1364481363.243:24287)"},
+#    "body"=>
+#     {"arch"=>"c000003e",
+#      "syscall"=>"2",
+#      "success"=>"no",
+#      "exit"=>"-13",
+#      "a0"=>"7fffd19c5592",
+#      "a1"=>"0",
+#      "a2"=>"7fffd19c4b50",
+#      "a3"=>"a",
+#      "items"=>"1",
+#      "ppid"=>"2686",
+#      "pid"=>"3538",
+#      "auid"=>"500",
+#      "uid"=>"500",
+#      "gid"=>"500",
+#      "euid"=>"500",
+#      "suid"=>"500",
+#      "fsuid"=>"500",
+#      "egid"=>"500",
+#      "sgid"=>"500",
+#      "fsgid"=>"500",
+#      "tty"=>"pts0",
+#      "ses"=>"1",
+#      "comm"=>"\"cat\"",
+#      "exe"=>"\"/bin/cat\"",
+#      "subj"=>"unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023",
+#      "key"=>"\"sshd_config\""}}
+```
