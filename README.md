@@ -83,3 +83,8 @@ pp AuditLogParser.parse_line(audit_log2)
 #        "terminal"=>"pts/0",
 #        "res"=>"failed"}}}
 ```
+
+## Related Links
+
+* [7.6. Understanding Audit Log Files - Red Hat Customer Portal](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sec-understanding_audit_log_files)
+* [SPEC Writing Good Events · linux-audit/audit-documentation Wiki](https://github.com/linux-audit/audit-documentation/wiki/SPEC-Writing-Good-Events)
