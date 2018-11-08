@@ -4,13 +4,13 @@ require 'audit_log_parser/version'
 class AuditLogParser
   class Error < StandardError; end
 
-  def self.parse(src)
+  def self.parse(src, flatten: false)
     src.each_line.map do |line|
-      parse_line(line)
+      parse_line(line, flatten: flatten)
     end
   end
 
-  def self.parse_line(line)
+  def self.parse_line(line, flatten: false)
     line = line.strip
 
     if line !~ /type=\w+ msg=audit\([\d.:]+\): /
@@ -21,11 +21,8 @@ class AuditLogParser
     header.chomp!(': ')
     header = parse_header(header)
     body = parse_body(body)
-
-    {
-      'header' => header,
-      'body' => body,
-    }
+    result = {'header' => header, 'body' => body}
+    flatten ? flatten_hash(result) : result
   end
 
   def self.parse_header(header)
@@ -83,4 +80,17 @@ class AuditLogParser
     result
   end
   private_class_method :parse_body
+
+  def self.flatten_hash(h)
+    h.flat_map {|key, value|
+      if value.is_a?(Hash)
+        flatten_hash(value).map do |sub_key, sub_value|
+          ["#{key}_#{sub_key}", sub_value]
+        end
+      else
+        [[key, value]]
+      end
+    }.to_h
+  end
+  private_class_method :flatten_hash
 end

@@ -82,4 +82,21 @@ pp AuditLogParser.parse_line(audit_log2)
 #        "addr"=>"?",
 #        "terminal"=>"pts/0",
 #        "res"=>"failed"}}}
+
+audit_log3 = <<EOS
+type=PATH msg=audit(1364481363.243:24287): item=0 name="/etc/ssh/sshd_config" inode=409248 dev=fd:00 mode=0100600 ouid=0 ogid=0 rdev=00:00 obj=system_u:object_r:etc_t:s0
+EOS
+
+pp AuditLogParser.parse_line(audit_log3, flatten: true)
+#=> {"header_type"=>"PATH",
+#    "header_msg"=>"audit(1364481363.243:24287)",
+#    "body_item"=>"0",
+#    "body_name"=>"\"/etc/ssh/sshd_config\"",
+#    "body_inode"=>"409248",
+#    "body_dev"=>"fd:00",
+#    "body_mode"=>"0100600",
+#    "body_ouid"=>"0",
+#    "body_ogid"=>"0",
+#    "body_rdev"=>"00:00",
+#    "body_obj"=>"system_u:object_r:etc_t:s0"}
 ```

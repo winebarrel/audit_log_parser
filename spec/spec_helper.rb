@@ -12,3 +12,26 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+module SpecHelper
+  def flatten(hash)
+    header = hash.fetch('header')
+    body = hash.fetch('body')
+
+    new_hash = (
+      header.map {|k, v| ["header_#{k}", v] } +
+      body.map {|k, v| ["body_#{k}", v] }
+    ).to_h
+
+    if new_hash.has_key?('body_msg')
+      body_msg = new_hash.delete('body_msg')
+
+      body_msg.each do |k, v|
+        new_hash["body_msg_#{k}"] = v
+      end
+    end
+
+    new_hash
+  end
+end
+include SpecHelper

@@ -90,6 +90,13 @@ RSpec.describe AuditLogParser do
       lines = audit_log.keys.join("\n")
       expect(AuditLogParser.parse(lines)).to eq audit_log.values
     end
+
+    context 'when flatten' do
+      specify '#parse can be parsed flatly' do
+        lines = audit_log.keys.join("\n")
+        expect(AuditLogParser.parse(lines, flatten: true)).to eq audit_log.values.map {|i| flatten(i) }
+      end
+    end
   end
 
   context 'when invalid log' do
