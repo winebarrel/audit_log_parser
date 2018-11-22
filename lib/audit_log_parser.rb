@@ -13,14 +13,15 @@ class AuditLogParser
   def self.parse_line(line, flatten: false)
     line = line.strip
 
-    if line !~ /type=\w+ msg=audit\([\d.:]+\): /
-      raise Error, "Invalid audit log header: #{line}"
+    if line !~ /type=\w+ msg=audit\([\d.:]+\): */
+      raise Error, "Invalid audit log header: #{line.inspect}"
     end
 
-    header, body = line.split(/: /, 2)
-    header.chomp!(': ')
+    header, body = line.split(/\): */, 2)
+    header << ')'
+    header.sub!(/: *\z/, '')
     header = parse_header(header)
-    body = parse_body(body)
+    body = parse_body(body.strip)
     result = {'header' => header, 'body' => body}
     flatten ? flatten_hash(result) : result
   end
@@ -38,8 +39,10 @@ class AuditLogParser
   private_class_method :parse_header
 
   def self.parse_body(body)
-    unless body.include?('=')
-      raise Error, "Invalid audit log body: #{body}"
+    if body.empty?
+      return {}
+    elsif !body.include?('=')
+      raise Error, "Invalid audit log body: #{body.inspect}"
     end
 
     result = {}
