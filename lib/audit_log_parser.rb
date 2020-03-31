@@ -7,13 +7,14 @@ class AuditLogParser
   # audit always uses uppercase hex digits. Fortunately addresses are generally lower-case.
   HEX_RE = /^[A-F0-9]{8,}$/
 
-  def self.parse(src, flatten: false, unhex: false)
+  # @param unhex_keys [Array<String>] with * meaning all
+  def self.parse(src, flatten: false, unhex: false, unhex_keys: ['*'])
     src.each_line.map do |line|
-      parse_line(line, flatten: flatten, unhex: unhex)
+      parse_line(line, flatten: flatten, unhex: unhex, unhex_keys: unhex_keys)
     end
   end
 
-  def self.parse_line(line, flatten: false, unhex: false)
+  def self.parse_line(line, flatten: false, unhex: false, unhex_keys: ['*'])
     line = line.strip
 
     if line !~ /type=\w+ msg=audit\([\d.:]+\): */
@@ -27,19 +28,20 @@ class AuditLogParser
     body = parse_body(body.strip)
 
     if unhex
-      unhex_hash!(header)
-      unhex_hash!(body)
+      unhex_keys = unhex_keys.include?('*') ? :all : unhex_keys
+      unhex_hash!(header, unhex_keys)
+      unhex_hash!(body, unhex_keys)
     end
 
     result = {'header' => header, 'body' => body}
     flatten ? flatten_hash(result) : result
   end
 
-  def self.unhex_hash!(hash)
+  def self.unhex_hash!(hash, unhex_keys)
     hash.each do |key, value|
       if value.kind_of?(Hash)
-        unhex_hash!(value)
-      elsif (value.length % 2) == 0 && HEX_RE.match(value)
+        unhex_hash!(value, unhex_keys)
+      elsif (unhex_keys == :all || unhex_keys.include?(key)) && (value.length % 2) == 0 && HEX_RE.match(value)
         value[0..-1] = [value].pack("H*")
       end
     end
