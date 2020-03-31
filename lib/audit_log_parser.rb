@@ -8,13 +8,13 @@ class AuditLogParser
   # @param unhex_keys [Array<String>] with * meaning all
   def self.parse(src, flatten: false, unhex: false, unhex_keys: ['*'], unhex_min_length: 8)
     # audit always uses uppercase hex digits. Fortunately addresses are generally lower-case.
-    unhex_re = /^[A-F0-9]{#{unhex_min_length},}$/  
     src.each_line.map do |line|
-      parse_line(line, flatten: flatten, unhex: unhex, unhex_keys: unhex_keys, unhex_re: unhex_re)
+      parse_line(line, flatten: flatten, unhex: unhex, unhex_keys: unhex_keys, unhex_min_length: unhex_min_length)
     end
   end
 
-  def self.parse_line(line, flatten: false, unhex: false, unhex_keys: ['*'], unhex_re: /^[A-F0-9]{8,}/)
+  def self.parse_line(line, flatten: false, unhex: false, unhex_keys: ['*'], unhex_min_length: 8)
+    unhex_re = /^[A-F0-9]{#{unhex_min_length},}$/  
     line = line.strip
 
     if line !~ /type=\w+ msg=audit\([\d.:]+\): */
