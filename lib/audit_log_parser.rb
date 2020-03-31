@@ -4,17 +4,17 @@ require 'audit_log_parser/version'
 class AuditLogParser
   class Error < StandardError; end
 
-  # audit always uses uppercase hex digits. Fortunately addresses are generally lower-case.
-  HEX_RE = /^[A-F0-9]{8,}$/
 
   # @param unhex_keys [Array<String>] with * meaning all
-  def self.parse(src, flatten: false, unhex: false, unhex_keys: ['*'])
+  def self.parse(src, flatten: false, unhex: false, unhex_keys: ['*'], unhex_min_length: 8)
+    # audit always uses uppercase hex digits. Fortunately addresses are generally lower-case.
+    unhex_re = /^[A-F0-9]{#{unhex_min_length},}$/  
     src.each_line.map do |line|
-      parse_line(line, flatten: flatten, unhex: unhex, unhex_keys: unhex_keys)
+      parse_line(line, flatten: flatten, unhex: unhex, unhex_keys: unhex_keys, unhex_re: unhex_re)
     end
   end
 
-  def self.parse_line(line, flatten: false, unhex: false, unhex_keys: ['*'])
+  def self.parse_line(line, flatten: false, unhex: false, unhex_keys: ['*'], unhex_re: /^[A-F0-9]{8,}/)
     line = line.strip
 
     if line !~ /type=\w+ msg=audit\([\d.:]+\): */
@@ -29,19 +29,19 @@ class AuditLogParser
 
     if unhex
       unhex_keys = unhex_keys.include?('*') ? :all : unhex_keys
-      unhex_hash!(header, unhex_keys)
-      unhex_hash!(body, unhex_keys)
+      unhex_hash!(header, unhex_keys, unhex_re)
+      unhex_hash!(body, unhex_keys, unhex_re)
     end
 
     result = {'header' => header, 'body' => body}
     flatten ? flatten_hash(result) : result
   end
 
-  def self.unhex_hash!(hash, unhex_keys)
+  def self.unhex_hash!(hash, unhex_keys, unhex_re)
     hash.each do |key, value|
       if value.kind_of?(Hash)
-        unhex_hash!(value, unhex_keys)
-      elsif (unhex_keys == :all || unhex_keys.include?(key)) && (value.length % 2) == 0 && HEX_RE.match(value)
+        unhex_hash!(value, unhex_keys, unhex_re)
+      elsif (unhex_keys == :all || unhex_keys.include?(key)) && (value.length % 2) == 0 && value =~ unhex_re
         value[0..-1] = [value].pack("H*")
       end
     end

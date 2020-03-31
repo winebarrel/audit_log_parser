@@ -135,6 +135,18 @@ RSpec.describe AuditLogParser do
       }
     end
 
+    let(:unhex_length_audit_log) do
+      {
+        %q{type=PROCTITLE msg=audit(1585655101.154:27786): proctitle=2F62696E2F7368002D6300636F6D6D616E64202D762064656269616E2D736131203E202F6465762F6E756C6C2026262064656269616E2D73613120312031 } => 
+        {"header"=>{"type"=>"PROCTITLE", "msg"=>"audit(1585655101.154:27786)"},
+        "body"=>
+          {
+            "proctitle" => "2F62696E2F7368002D6300636F6D6D616E64202D762064656269616E2D736131203E202F6465762F6E756C6C2026262064656269616E2D73613120312031", 
+          }
+        }
+      }
+    end
+
     specify '#parse correctly unhex proctitle' do
       lines = unhex_audit_log.keys.join("\n")
       expect(AuditLogParser.parse(lines, unhex: true)).to eq unhex_audit_log.values
@@ -143,6 +155,11 @@ RSpec.describe AuditLogParser do
     specify '#parse correctly unhex specific keys' do
       lines = unhex_specific_audit_log.keys.join("\n")
       expect(AuditLogParser.parse(lines, unhex: true, unhex_keys: ['proctitle2'])).to eq unhex_specific_audit_log.values
+    end
+
+    specify '#parse does not unhex short keys' do
+      lines = unhex_length_audit_log.keys.join("\n")
+      expect(AuditLogParser.parse(lines, unhex: true, unhex_keys: ['proctitle'], unhex_min_length: 10000)).to eq unhex_length_audit_log.values
     end
   end
 
