@@ -4,13 +4,16 @@ require 'audit_log_parser/version'
 class AuditLogParser
   class Error < StandardError; end
 
-  def self.parse(src, flatten: false)
+  # audit always uses uppercase hex digits. Fortunately addresses are generally lower-case.
+  HEX_RE = /^[A-F0-9]{8,}$/
+
+  def self.parse(src, flatten: false, unhex: false)
     src.each_line.map do |line|
-      parse_line(line, flatten: flatten)
+      parse_line(line, flatten: flatten, unhex: unhex)
     end
   end
 
-  def self.parse_line(line, flatten: false)
+  def self.parse_line(line, flatten: false, unhex: false)
     line = line.strip
 
     if line !~ /type=\w+ msg=audit\([\d.:]+\): */
@@ -22,8 +25,24 @@ class AuditLogParser
     header.sub!(/: *\z/, '')
     header = parse_header(header)
     body = parse_body(body.strip)
+
+    if unhex
+      unhex_hash!(header)
+      unhex_hash!(body)
+    end
+
     result = {'header' => header, 'body' => body}
     flatten ? flatten_hash(result) : result
+  end
+
+  def self.unhex_hash!(hash)
+    hash.each do |key, value|
+      if value.kind_of?(Hash)
+        unhex_hash!(value)
+      elsif (value.length % 2) == 0 && HEX_RE.match?(value)
+        value[0..-1] = [value].pack("H*")
+      end
+    end
   end
 
   def self.parse_header(header)
