@@ -39,7 +39,7 @@ class AuditLogParser
     hash.each do |key, value|
       if value.kind_of?(Hash)
         unhex_hash!(value)
-      elsif (value.length % 2) == 0 && HEX_RE.match?(value)
+      elsif (value.length % 2) == 0 && HEX_RE.match(value)
         value[0..-1] = [value].pack("H*")
       end
     end
